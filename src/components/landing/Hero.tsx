@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import AnimatedSection from '../ui/AnimatedSection';
 
 // Staggered animation for child elements
@@ -27,6 +28,7 @@ const fadeInUp = {
 };
 
 const Hero: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <section className="bg-gradient-to-b from-blue-50 to-white py-20 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -67,6 +69,7 @@ const Hero: React.FC = () => {
                   className="bg-[#0170BA] hover:bg-[#0052A5] text-white px-8 py-3 rounded-md text-lg font-medium transition-colors shadow-md"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/app')}
                 >
                   Get Started
                 </motion.button>
@@ -76,6 +79,7 @@ const Hero: React.FC = () => {
                   className="border border-[#0170BA] text-[#0170BA] hover:bg-blue-50 px-8 py-3 rounded-md text-lg font-medium transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/login')}
                 >
                   Sign In
                 </motion.button>

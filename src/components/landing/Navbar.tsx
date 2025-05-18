@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50">
@@ -35,6 +37,7 @@ const Navbar: React.FC = () => {
               data-navigation
               data-navigation-target="/app"
               className="text-[#0170BA] hover:text-[#0052A5] transition-colors"
+              onClick={() => navigate('/login')}
             >
               Login
             </button>
@@ -42,6 +45,7 @@ const Navbar: React.FC = () => {
               data-navigation
               data-navigation-target="/app"
               className="bg-[#0170BA] hover:bg-[#0052A5] text-white px-4 py-2 rounded-md transition-colors"
+              onClick={() => navigate('/app')}
             >
               Get Started
             </button>

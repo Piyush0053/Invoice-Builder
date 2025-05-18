@@ -9,10 +9,22 @@ const Login: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       setError(null);
+      // Make sure popup blocker is disabled
       await loginWithGoogle();
-    } catch (error) {
+      console.log('Sign in successful');
+    } catch (error: any) {
       console.error('Login error:', error);
-      setError('Failed to sign in with Google. Please try again.');
+      
+      // Provide specific error messages based on error code
+      if (error.code === 'auth/popup-blocked') {
+        setError('Popup was blocked by your browser. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again when ready.');
+      } else if (error.code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection and try again.');
+      } else {
+        setError('Failed to sign in with Google. Please try again.');
+      }
     }
   };
 
