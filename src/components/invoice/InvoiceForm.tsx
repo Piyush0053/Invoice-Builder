@@ -1,6 +1,6 @@
 import React from 'react';
+import { Plus, Trash2, Receipt, User, Calendar, CreditCard, DollarSign, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Receipt, User, Calendar, CreditCard, DollarSign } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -8,7 +8,8 @@ import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import { useInvoice } from '../../context/InvoiceContext';
 import { currencies } from '../../data/currencies';
-import { v4 as uuidv4 } from 'uuid';
+import AnimatedSection from '../ui/AnimatedSection';
+import { Company, Client } from '../../types';
 
 const InvoiceForm: React.FC = () => {
   const { 
@@ -20,6 +21,37 @@ const InvoiceForm: React.FC = () => {
     removeItem,
     updateInvoiceField
   } = useInvoice();
+  
+  // Type guard to check if company is a Company object
+  const isCompany = (company: any): company is Company => {
+    return company && typeof company === 'object' && 'name' in company;
+  };
+
+  // Type guard to check if client is a Client object
+  const isClient = (client: any): client is Client => {
+    return client && typeof client === 'object' && 'name' in client;
+  };
+
+  // Helper function to get company details safely
+  const getCompanyDetails = (companyData: Company | string | undefined = currentInvoice.company) => {
+    if (!companyData) return { name: '', address: '', city: '', state: '', zipCode: '', country: '', phone: '', email: '', website: '', taxId: '', logo: '' };
+    if (isCompany(companyData)) {
+      return companyData;
+    }
+    return { name: String(companyData), address: '', city: '', state: '', zipCode: '', country: '', phone: '', email: '', website: '', taxId: '', logo: '' };
+  };
+
+  // Helper function to get client details safely
+  const getClientDetails = (clientData: Client | string | undefined = currentInvoice.client) => {
+    if (!clientData) return { name: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '', country: '', taxId: '' };
+    if (isClient(clientData)) {
+      return clientData;
+    }
+    return { name: String(clientData), email: '', phone: '', address: '', city: '', state: '', zipCode: '', country: '', taxId: '' };
+  };
+
+  const company = getCompanyDetails();
+  const client = getClientDetails();
   
   const currencyOptions = currencies.map(currency => ({
     value: currency.code,
@@ -33,140 +65,236 @@ const InvoiceForm: React.FC = () => {
     { value: 'overdue', label: 'Overdue' }
   ];
   
+  // Animation variants for form sections
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+  };
+
+  // Animation for form items
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.5,
+      },
+    }),
+  };
+
+  // Function to handle sending invoice
+  const handleSendInvoice = async () => {
+    try {
+      // TODO: Implement email sending logic
+      alert('Invoice sent successfully!');
+    } catch (error) {
+      console.error('Error sending invoice:', error);
+      alert('Failed to send invoice. Please try again.');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Card title="Invoice Details" className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Invoice Number"
-              value={currentInvoice.invoiceNumber}
-              onChange={(value) => updateInvoiceField('invoiceNumber', value)}
-              icon={<Receipt size={16} className="text-secondary-400" />}
-            />
-            
-            <Select
-              label="Currency"
-              options={currencyOptions}
-              value={currentInvoice.currency}
-              onChange={(value) => updateInvoiceField('currency', value)}
-            />
-            
-            <Input
-              label="Invoice Date"
-              type="date"
-              value={currentInvoice.date}
-              onChange={(value) => updateInvoiceField('date', value)}
-              icon={<Calendar size={16} className="text-secondary-400" />}
-            />
-            
-            <Input
-              label="Due Date"
-              type="date"
-              value={currentInvoice.dueDate}
-              onChange={(value) => updateInvoiceField('dueDate', value)}
-              icon={<Calendar size={16} className="text-secondary-400" />}
-            />
-            
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={currentInvoice.status}
-              onChange={(value) => updateInvoiceField('status', value as any)}
-            />
-            
-            <Input
-              label="Payment Method"
-              value={currentInvoice.paymentMethod || ''}
-              onChange={(value) => updateInvoiceField('paymentMethod', value)}
-              icon={<CreditCard size={16} className="text-secondary-400" />}
-              placeholder="e.g., Bank Transfer, PayPal, Credit Card"
-            />
-          </div>
-        </Card>
-      </motion.div>
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSendInvoice}
+          variant="primary"
+          className="flex items-center gap-2"
+        >
+          <Mail size={16} />
+          Send Invoice
+        </Button>
+      </div>
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+      <AnimatedSection
+        direction="up"
+        duration={0.7}
+        delay={0.1}
+      >
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Card title="Invoice Details" className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div
+                variants={itemVariants}
+                custom={0}
+                initial="hidden"
+                animate="visible"
+              >
+                <Input
+                  label="Invoice Number"
+                  value={currentInvoice.invoiceNumber}
+                  onChange={(value) => updateInvoiceField('invoiceNumber', value)}
+                  icon={<Receipt size={16} className="text-secondary-400" />}
+                />
+              </motion.div>
+            
+              <motion.div
+                variants={itemVariants}
+                custom={1}
+                initial="hidden"
+                animate="visible"
+              >
+                <Select
+                  label="Currency"
+                  options={currencyOptions}
+                  value={currentInvoice.currency}
+                  onChange={(value) => updateInvoiceField('currency', value)}
+                />
+              </motion.div>
+            
+              <motion.div
+                variants={itemVariants}
+                custom={2}
+                initial="hidden"
+                animate="visible"
+              >
+                <Input
+                  label="Invoice Date"
+                  type="date"
+                  value={currentInvoice.date}
+                  onChange={(value) => updateInvoiceField('date', value)}
+                  icon={<Calendar size={16} className="text-secondary-400" />}
+                />
+              </motion.div>
+            
+              <motion.div
+                variants={itemVariants}
+                custom={3}
+                initial="hidden"
+                animate="visible"
+              >
+                <Input
+                  label="Due Date"
+                  type="date"
+                  value={currentInvoice.dueDate}
+                  onChange={(value) => updateInvoiceField('dueDate', value)}
+                  icon={<Calendar size={16} className="text-secondary-400" />}
+                />
+              </motion.div>
+            
+              <motion.div
+                variants={itemVariants}
+                custom={4}
+                initial="hidden"
+                animate="visible"
+              >
+                <Select
+                  label="Status"
+                  options={statusOptions}
+                  value={currentInvoice.status}
+                  onChange={(value) => updateInvoiceField('status', value as any)}
+                />
+              </motion.div>
+            
+              <motion.div
+                variants={itemVariants}
+                custom={5}
+                initial="hidden"
+                animate="visible"
+              >
+                <Input
+                  label="Payment Method"
+                  value={currentInvoice.paymentMethod || ''}
+                  onChange={(value) => updateInvoiceField('paymentMethod', value)}
+                  icon={<CreditCard size={16} className="text-secondary-400" />}
+                  placeholder="e.g., Bank Transfer, PayPal, Credit Card"
+                />
+              </motion.div>
+            </div>
+          </Card>
+        </motion.div>
+      </AnimatedSection>
+      
+      <AnimatedSection
+        direction="up"
+        duration={0.7}
+        delay={0.2}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card title="Your Company">
             <div className="space-y-4">
               <Input
                 label="Company Name"
-                value={currentInvoice.company.name}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, name: value })}
+                value={company.name}
+                onChange={(value) => updateCompany({ ...company, name: value })}
               />
               
               <Input
                 label="Address"
-                value={currentInvoice.company.address}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, address: value })}
+                value={company.address}
+                onChange={(value) => updateCompany({ ...company, address: value })}
               />
               
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="City"
-                  value={currentInvoice.company.city}
-                  onChange={(value) => updateCompany({ ...currentInvoice.company, city: value })}
+                  value={company.city}
+                  onChange={(value) => updateCompany({ ...company, city: value })}
                 />
                 
                 <Input
                   label="State/Province"
-                  value={currentInvoice.company.state}
-                  onChange={(value) => updateCompany({ ...currentInvoice.company, state: value })}
+                  value={company.state}
+                  onChange={(value) => updateCompany({ ...company, state: value })}
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Zip/Postal Code"
-                  value={currentInvoice.company.zipCode}
-                  onChange={(value) => updateCompany({ ...currentInvoice.company, zipCode: value })}
+                  value={company.zipCode}
+                  onChange={(value) => updateCompany({ ...company, zipCode: value })}
                 />
                 
                 <Input
                   label="Country"
-                  value={currentInvoice.company.country}
-                  onChange={(value) => updateCompany({ ...currentInvoice.company, country: value })}
+                  value={company.country}
+                  onChange={(value) => updateCompany({ ...company, country: value })}
                 />
               </div>
               
               <Input
                 label="Phone"
-                value={currentInvoice.company.phone}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, phone: value })}
+                value={company.phone}
+                onChange={(value) => updateCompany({ ...company, phone: value })}
               />
               
               <Input
                 label="Email"
                 type="email"
-                value={currentInvoice.company.email}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, email: value })}
+                value={company.email}
+                onChange={(value) => updateCompany({ ...company, email: value })}
               />
               
               <Input
                 label="Website"
-                value={currentInvoice.company.website}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, website: value })}
+                value={company.website}
+                onChange={(value) => updateCompany({ ...company, website: value })}
               />
               
               <Input
                 label="Tax ID / VAT Number"
-                value={currentInvoice.company.taxId}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, taxId: value })}
+                value={company.taxId}
+                onChange={(value) => updateCompany({ ...company, taxId: value })}
               />
               
               <Input
                 label="Logo URL"
-                value={currentInvoice.company.logo || ''}
-                onChange={(value) => updateCompany({ ...currentInvoice.company, logo: value })}
+                value={company.logo || ''}
+                onChange={(value) => updateCompany({ ...company, logo: value })}
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -176,72 +304,72 @@ const InvoiceForm: React.FC = () => {
             <div className="space-y-4">
               <Input
                 label="Client Name"
-                value={currentInvoice.client.name}
-                onChange={(value) => updateClient({ ...currentInvoice.client, name: value })}
+                value={client.name}
+                onChange={(value) => updateClient({ ...client, name: value })}
                 icon={<User size={16} className="text-secondary-400" />}
               />
               
               <Input
                 label="Address"
-                value={currentInvoice.client.address}
-                onChange={(value) => updateClient({ ...currentInvoice.client, address: value })}
+                value={client.address}
+                onChange={(value) => updateClient({ ...client, address: value })}
               />
               
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="City"
-                  value={currentInvoice.client.city}
-                  onChange={(value) => updateClient({ ...currentInvoice.client, city: value })}
+                  value={client.city}
+                  onChange={(value) => updateClient({ ...client, city: value })}
                 />
                 
                 <Input
                   label="State/Province"
-                  value={currentInvoice.client.state}
-                  onChange={(value) => updateClient({ ...currentInvoice.client, state: value })}
+                  value={client.state}
+                  onChange={(value) => updateClient({ ...client, state: value })}
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Zip/Postal Code"
-                  value={currentInvoice.client.zipCode}
-                  onChange={(value) => updateClient({ ...currentInvoice.client, zipCode: value })}
+                  value={client.zipCode}
+                  onChange={(value) => updateClient({ ...client, zipCode: value })}
                 />
                 
                 <Input
                   label="Country"
-                  value={currentInvoice.client.country}
-                  onChange={(value) => updateClient({ ...currentInvoice.client, country: value })}
+                  value={client.country}
+                  onChange={(value) => updateClient({ ...client, country: value })}
                 />
               </div>
               
               <Input
                 label="Phone"
-                value={currentInvoice.client.phone}
-                onChange={(value) => updateClient({ ...currentInvoice.client, phone: value })}
+                value={client.phone}
+                onChange={(value) => updateClient({ ...client, phone: value })}
               />
               
               <Input
                 label="Email"
                 type="email"
-                value={currentInvoice.client.email}
-                onChange={(value) => updateClient({ ...currentInvoice.client, email: value })}
+                value={client.email}
+                onChange={(value) => updateClient({ ...client, email: value })}
               />
               
               <Input
                 label="Tax ID / VAT Number"
-                value={currentInvoice.client.taxId}
-                onChange={(value) => updateClient({ ...currentInvoice.client, taxId: value })}
+                value={client.taxId}
+                onChange={(value) => updateClient({ ...client, taxId: value })}
               />
             </div>
           </Card>
         </div>
-      </motion.div>
+      </AnimatedSection>
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+      <AnimatedSection
+        direction="up"
+        duration={0.7}
+        delay={0.3}
       >
         <Card 
           title="Invoice Items" 
@@ -273,12 +401,12 @@ const InvoiceForm: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2 mt-2">
-                {currentInvoice.items.map((item) => (
-                  <motion.div 
+                {currentInvoice.items.map((item, index) => (
+                  <AnimatedSection 
                     key={item.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                    direction="up"
+                    duration={0.5}
+                    delay={0.1 + (index * 0.05)}
                     className="invoice-item-row border-b border-secondary-100 pb-2"
                   >
                     <div className="col-span-5">
@@ -302,7 +430,7 @@ const InvoiceForm: React.FC = () => {
                     <div className="col-span-2">
                       <Input
                         type="number"
-                        value={item.unitPrice.toString()}
+                        value={(item.unitPrice || 0).toString()}
                         onChange={(value) => updateItem(item.id, { unitPrice: parseFloat(value) || 0 })}
                         min="0"
                         step="0.01"
@@ -312,7 +440,7 @@ const InvoiceForm: React.FC = () => {
                     <div className="col-span-1">
                       <Input
                         type="number"
-                        value={item.taxRate.toString()}
+                        value={(item.taxRate || 0).toString()}
                         onChange={(value) => updateItem(item.id, { taxRate: parseFloat(value) || 0 })}
                         min="0"
                         max="100"
@@ -323,7 +451,7 @@ const InvoiceForm: React.FC = () => {
                     <div className="col-span-2 flex space-x-2">
                       <Input
                         type="number"
-                        value={item.discount.toString()}
+                        value={(item.discount || 0).toString()}
                         onChange={(value) => updateItem(item.id, { discount: parseFloat(value) || 0 })}
                         min="0"
                         step={item.discountType === 'percentage' ? '1' : '0.01'}
@@ -334,7 +462,7 @@ const InvoiceForm: React.FC = () => {
                           { value: 'percentage', label: '%' },
                           { value: 'fixed', label: '$' }
                         ]}
-                        value={item.discountType}
+                        value={item.discountType || "percentage"}
                         onChange={(value) => updateItem(item.id, { discountType: value as 'percentage' | 'fixed' })}
                         className="w-16"
                       />
@@ -349,7 +477,7 @@ const InvoiceForm: React.FC = () => {
                         <Trash2 size={18} />
                       </button>
                     </div>
-                  </motion.div>
+                  </AnimatedSection>
                 ))}
               </div>
             )}
@@ -367,7 +495,7 @@ const InvoiceForm: React.FC = () => {
                 <span className="text-secondary-600">Tax:</span>
                 <span className="font-medium">
                   <DollarSign className="inline-block h-4 w-4 text-secondary-500" />
-                  {currentInvoice.taxTotal.toFixed(2)}
+                  ${(currentInvoice.taxTotal || currentInvoice.tax || 0).toFixed(2)}
                 </span>
               </div>
               
@@ -375,7 +503,7 @@ const InvoiceForm: React.FC = () => {
                 <span className="text-secondary-600">Discount:</span>
                 <span className="font-medium">
                   <DollarSign className="inline-block h-4 w-4 text-secondary-500" />
-                  {currentInvoice.discountTotal.toFixed(2)}
+                  ${(currentInvoice.discountTotal || currentInvoice.discount || 0).toFixed(2)}
                 </span>
               </div>
               
@@ -389,12 +517,12 @@ const InvoiceForm: React.FC = () => {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </AnimatedSection>
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+      <AnimatedSection
+        direction="up"
+        duration={0.7}
+        delay={0.4}
       >
         <Card title="Additional Information">
           <div className="space-y-4">
@@ -415,7 +543,7 @@ const InvoiceForm: React.FC = () => {
             />
           </div>
         </Card>
-      </motion.div>
+      </AnimatedSection>
     </div>
   );
 };

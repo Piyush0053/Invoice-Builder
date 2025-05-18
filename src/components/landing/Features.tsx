@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calculator, FileText, Mail, Clock, CreditCard, LineChart } from 'lucide-react';
+import AnimatedSection from '../ui/AnimatedSection';
 
 const FeatureCard: React.FC<{
   icon: React.ReactNode;
@@ -9,19 +10,29 @@ const FeatureCard: React.FC<{
   delay: number;
 }> = ({ icon, title, description, delay }) => {
   return (
-    <motion.div 
-      className="bg-white rounded-lg shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay }}
+    <AnimatedSection 
+      className="group relative bg-white rounded-xl p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden"
+      direction="up"
+      duration={0.6}
+      delay={delay}
     >
-      <div className="bg-blue-100 text-[#0170BA] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        {icon}
-      </div>
-      <h3 className="text-xl font-semibold mb-3 text-gray-900">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </motion.div>
+      {/* Animated background effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <motion.div 
+        className="relative z-10"
+        whileHover={{ y: -5 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+      >
+        <div className="bg-gradient-to-br from-[#0170BA] to-[#00A3FF] text-white w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg">
+          {icon}
+        </div>
+        <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-[#0170BA] transition-colors">
+          {title}
+        </h3>
+        <p className="text-gray-600 leading-relaxed">{description}</p>
+      </motion.div>
+    </AnimatedSection>
   );
 };
 
@@ -60,27 +71,21 @@ const Features: React.FC = () => {
   ];
 
   return (
-    <section id="features" className="py-20 px-6 bg-gray-50">
+    <section id="features" className="py-24 px-6 bg-gradient-to-b from-white to-blue-50">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <motion.h2 
-            className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            Powerful Features for Effortless Invoicing
-          </motion.h2>
-          <motion.p 
-            className="text-xl text-gray-600 max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Everything you need to create, manage, and track professional invoices
-          </motion.p>
+        <div className="text-center mb-20">
+          <AnimatedSection direction="up" duration={0.8} delay={0.1}>
+            <motion.h2 
+              className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600"
+            >
+              Powerful Features for Effortless Invoicing
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-gray-600 max-w-2xl mx-auto"
+            >
+              Everything you need to create, manage, and track professional invoices
+            </motion.p>
+          </AnimatedSection>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

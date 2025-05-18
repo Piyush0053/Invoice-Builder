@@ -1,48 +1,55 @@
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Invoice } from '../types';
 
-export const generatePDF = async (invoice: Invoice): Promise<Blob> => {
-  // Get the invoice element
-  const element = document.getElementById('invoice-preview');
-  if (!element) {
-    throw new Error('Invoice preview element not found');
-  }
-
+// Generate PDF from HTML element
+export const generatePdf = async (element: HTMLElement): Promise<Blob> => {
   try {
-    // Convert the element to a PNG
-    const dataUrl = await toPng(element, { 
-      quality: 0.95,
+    const canvas = await html2canvas(element, {
+      scale: 2, // Higher quality
+      useCORS: true,
+      logging: false,
+      allowTaint: true,
       backgroundColor: 'white',
-      width: element.offsetWidth,
-      height: element.offsetHeight
     });
-    
-    // Create a new PDF
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
-    // Calculate dimensions to fit the image properly on the page
-    const imgWidth = 210; // A4 width in mm
-    const imgHeight = (element.offsetHeight * imgWidth) / element.offsetWidth;
-    
-    // Add the image to the PDF
-    pdf.addImage(dataUrl, 'PNG', 0, 0, imgWidth, imgHeight);
-    
-    // Return the PDF as a blob
-    return pdf.output('blob');
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    return new Blob([pdf.output('blob')], { type: 'application/pdf' });
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;
   }
 };
 
+// For backward compatibility
+export const generatePDF = async (invoice: Invoice): Promise<Blob> => {
+  const element = document.getElementById('invoice-preview');
+  if (!element) {
+    throw new Error('Invoice preview element not found');
+  }
+  return generatePdf(element);
+};
+
+// Generate a URL for the PDF
+export const generatePdfUrl = async (element: HTMLElement): Promise<string> => {
+  const pdfBlob = await generatePdf(element);
+  return URL.createObjectURL(pdfBlob);
+};
+
 export const downloadPDF = async (invoice: Invoice): Promise<void> => {
   try {
-    const pdfBlob = await generatePDF(invoice);
+    const element = document.getElementById('invoice-preview');
+    if (!element) {
+      throw new Error('Invoice preview element not found');
+    }
+    
+    const pdfBlob = await generatePdf(element);
     const url = URL.createObjectURL(pdfBlob);
     
     // Create a link element and trigger download

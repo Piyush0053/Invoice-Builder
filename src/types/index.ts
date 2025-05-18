@@ -24,15 +24,19 @@ export interface Client {
   taxId: string;
 }
 
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+
 export interface InvoiceItem {
   id: string;
   description: string;
   quantity: number;
-  unitPrice: number;
-  taxRate: number;
-  discount: number;
-  discountType: 'percentage' | 'fixed';
-  total: number;
+  price: number;
+  amount: number;
+  unitPrice?: number; // Alias for price for backward compatibility
+  taxRate?: number;
+  discount?: number;
+  discountType?: 'percentage' | 'fixed';
+  note?: string;
 }
 
 export interface Invoice {
@@ -40,20 +44,31 @@ export interface Invoice {
   invoiceNumber: string;
   date: string;
   dueDate: string;
-  company: Company;
-  client: Client;
+  from: string;
+  to: string;
+  toEmail: string;
   items: InvoiceItem[];
   notes: string;
   terms: string;
   subtotal: number;
-  taxTotal: number;
-  discountTotal: number;
+  taxRate: number;
+  tax: number;
+  taxTotal?: number; // Alias for tax for backward compatibility
+  discount?: number;
+  discountTotal?: number; // Alias for discount for backward compatibility
   total: number;
   currency: string;
-  status: 'draft' | 'sent' | 'paid' | 'overdue';
+  status: InvoiceStatus;
   paymentMethod?: string;
+  paymentReference?: string;
+  userId?: string;
   createdAt: string;
   updatedAt: string;
+  sentAt?: string;
+  paidAt?: string;
+  // For backward compatibility
+  company?: Company | string;
+  client?: Client | string;
 }
 
 export interface InvoiceTemplate {
