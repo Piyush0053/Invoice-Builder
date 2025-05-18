@@ -54,9 +54,8 @@ const PricingCard: React.FC<{
       </ul>
       
       <button
-        onClick={() => {
-          window.location.href = '/app';
-        }}
+        data-navigation
+        data-navigation-target="/app"
         className={`${
           plan.isPopular
             ? 'bg-[#0170BA] hover:bg-[#0052A5] text-white'

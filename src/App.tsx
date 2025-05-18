@@ -48,29 +48,41 @@ function App() {
     };
   }, []);
 
-  // Override the navigation for buttons that use window.location.href
+  // Alternative approach to handle navigation without redefining window.location
   useEffect(() => {
-    // Override window.location.href setter for navigation buttons
-    const originalWindowLocation = Object.getOwnPropertyDescriptor(window, 'location');
-    
-    Object.defineProperty(window, 'location', {
-      get: function() {
-        return originalWindowLocation?.get?.call(this);
-      },
-      set: function(url) {
-        if (url === '/app') {
-          window.history.pushState({}, '', '/app');
-          setCurrentRoute('app');
-          return url;
+    // Create a custom navigation function
+    const handleCustomNavigation = (url: string) => {
+      if (url === '/app') {
+        window.history.pushState({}, '', '/app');
+        setCurrentRoute('app');
+      } else {
+        window.location.href = url;
+      }
+    };
+
+    // Expose the navigation function globally
+    (window as any).customNavigate = handleCustomNavigation;
+
+    // Add a click event listener to intercept navigation actions
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const navigationLink = target.closest('[data-navigation]');
+      
+      if (navigationLink) {
+        const targetUrl = navigationLink.getAttribute('data-navigation-target');
+        if (targetUrl) {
+          e.preventDefault();
+          handleCustomNavigation(targetUrl);
         }
-        return originalWindowLocation?.set?.call(this, url);
-      },
-      configurable: true
-    });
+      }
+    };
+
+    document.addEventListener('click', handleClick);
 
     return () => {
-      // Restore original window.location
-      Object.defineProperty(window, 'location', originalWindowLocation as PropertyDescriptor);
+      // Clean up
+      document.removeEventListener('click', handleClick);
+      delete (window as any).customNavigate;
     };
   }, []);
   

@@ -21,9 +21,8 @@ const Hero: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <motion.button
-                onClick={() => {
-                  window.location.href = '/app';
-                }}
+                data-navigation
+                data-navigation-target="/app"
                 className="bg-[#0170BA] hover:bg-[#0052A5] text-white px-8 py-3 rounded-md text-lg font-medium transition-colors shadow-md"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -31,9 +30,8 @@ const Hero: React.FC = () => {
                 Get Started
               </motion.button>
               <motion.button
-                onClick={() => {
-                  window.location.href = '/app';
-                }}
+                data-navigation
+                data-navigation-target="/app"
                 className="border border-[#0170BA] text-[#0170BA] hover:bg-blue-50 px-8 py-3 rounded-md text-lg font-medium transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

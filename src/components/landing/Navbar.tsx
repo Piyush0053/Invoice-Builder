@@ -32,19 +32,15 @@ const Navbar: React.FC = () => {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => {
-                // Navigate to sign-in
-                window.location.href = '/app';
-              }}
+              data-navigation
+              data-navigation-target="/app"
               className="text-[#0170BA] hover:text-[#0052A5] transition-colors"
             >
               Login
             </button>
             <button
-              onClick={() => {
-                // Navigate to sign-up
-                window.location.href = '/app';
-              }}
+              data-navigation
+              data-navigation-target="/app"
               className="bg-[#0170BA] hover:bg-[#0052A5] text-white px-4 py-2 rounded-md transition-colors"
             >
               Get Started
@@ -96,20 +92,18 @@ const Navbar: React.FC = () => {
               </a>
               <div className="pt-2 flex flex-col space-y-2">
                 <button
-                  onClick={() => {
-                    // Navigate to sign-in
-                    window.location.href = '/app';
-                  }}
+                  data-navigation
+                  data-navigation-target="/app"
                   className="text-[#0170BA] hover:text-[#0052A5] transition-colors py-2"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Login
                 </button>
                 <button
-                  onClick={() => {
-                    // Navigate to sign-up
-                    window.location.href = '/app';
-                  }}
+                  data-navigation
+                  data-navigation-target="/app"
                   className="bg-[#0170BA] hover:bg-[#0052A5] text-white px-4 py-2 rounded-md transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started
                 </button>
