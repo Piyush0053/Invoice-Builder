@@ -28,7 +28,7 @@ export const generatePdf = async (element: HTMLElement): Promise<Blob> => {
 };
 
 // For backward compatibility
-export const generatePDF = async (invoice: Invoice): Promise<Blob> => {
+export const generatePDF = async (_invoice: Invoice): Promise<Blob> => {
   const element = document.getElementById('invoice-preview');
   if (!element) {
     throw new Error('Invoice preview element not found');
